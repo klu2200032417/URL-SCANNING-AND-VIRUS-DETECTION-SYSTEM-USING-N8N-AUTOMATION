@@ -1,0 +1,140 @@
+{
+  "name": "My workflow 4",
+  "nodes": [
+    {
+      "parameters": {
+        "sendTo": "gurramsrinivaste@gmail.com",
+        "subject": "=🚨 Threat Alert: Malicious URL Detected ({{$json[\"malicious_score\"]}}%)",
+        "message": "=🚨 <b>Security Alert: Malicious URL Detected</b><br><br>\n\n🔗 <b>URL:</b><br>\n{{$json[\"url\"]}}<br><br>\n\n🧠 <b>Final Verdict:</b><br>\n{{$json[\"final_verdict\"]}}<br><br>\n\n📊 <b>Malicious Score:</b><br>\n{{$json[\"malicious_score\"]}}%<br><br>\n\n🔍 <b>Detected By:</b><br>\n{{ $json[\"results\"][\"random_forest\"] ? \"• Random Forest<br>\" : \"\" }}\n{{ $json[\"results\"][\"logistic_regression\"] ? \"• Logistic Regression<br>\" : \"\" }}\n{{ $json[\"results\"][\"lexical_analysis\"] ? \"• Lexical Analysis<br>\" : \"\" }}\n{{ $json[\"results\"][\"blacklist\"] ? \"• Blacklist<br>\" : \"\" }}\n\n<br>\n📌 <b>Recommendation:</b><br>\nAvoid accessing this URL. It may be unsafe.",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "91a3d67c-fb3d-448a-82aa-aae99b21a326",
+      "name": "Send a message",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        1376,
+        256
+      ],
+      "webhookId": "52afb8b3-72dc-4c73-82a2-a8b7ae2e8aee",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "gQ4265kV9YBFgf7E",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=http://host.docker.internal:5000/predict?url={{ $json.query.url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        800,
+        272
+      ],
+      "id": "aa37ca9d-c635-46de-b3c0-5b32debccbd0",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "path": "88679464-4f99-4b59-aa16-fc9e2f59adef",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        608,
+        272
+      ],
+      "id": "b722aa86-f4ae-4561-abdf-230a1fb75464",
+      "name": "Webhook",
+      "webhookId": "88679464-4f99-4b59-aa16-fc9e2f59adef"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "727f5367-445d-40a6-b01c-3b555378d574",
+              "leftValue": "={{$json[\"final_verdict\"]}}",
+              "rightValue": "Malicious",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1040,
+        272
+      ],
+      "id": "4395a162-46d1-476f-9055-244cbe1338c4",
+      "name": "If"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a8e32ae6-6268-4355-bf70-ef4b4b55a076",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "11ae08198c4840d3e16b91fa6d5a4e01ad297e75208208d77661abde5a982b39"
+  },
+  "id": "Un9HfrBBvNRR0WT5",
+  "tags": []
+}
